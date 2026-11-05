@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Bronnenmonitor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Bronnenmonitor</h1>
+    <nav id="tabs" hidden>
+      <button class="tab active" data-view="items">Berichten</button>
+      <button class="tab" data-view="sources">Bronnen</button>
+    </nav>
+    <button id="logout" class="link" hidden>Uitloggen</button>
+  </header>
+
+  <main>
+    <!-- Melding (fouten, bevestigingen) -->
+    <div id="notice" class="notice" hidden></div>
+
+    <!-- Inloggen -->
+    <section id="view-login" class="card narrow" hidden>
+      <h2>Inloggen</h2>
+      <p>Je krijgt een inloglink per mail.</p>
+      <form id="login-form">
+        <label for="login-email">E-mailadres</label>
+        <input id="login-email" type="email" required autocomplete="email">
+        <button type="submit" class="primary">Stuur inloglink</button>
+      </form>
+    </section>
+
+    <!-- Berichten -->
+    <section id="view-items" hidden>
+      <form id="filters" class="filters">
+        <input id="f-search" type="search" placeholder="Zoeken in titel en tekst…" aria-label="Zoeken">
+        <select id="f-status" aria-label="Status">
+          <option value="">Alle berichten</option>
+          <option value="unread">Ongelezen</option>
+          <option value="saved">Bewaard</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <select id="f-category" aria-label="Categorie"><option value="">Alle categorieën</option></select>
+        <select id="f-source" aria-label="Bron"><option value="">Alle bronnen</option></select>
+        <select id="f-tag" aria-label="Tag"><option value="">Alle tags</option></select>
+      </form>
+      <div class="list-header">
+        <span id="items-count"></span>
+        <button id="mark-all-read" class="link">Zichtbare als gelezen markeren</button>
+      </div>
+      <ul id="items" class="items"></ul>
+      <button id="load-more" class="secondary wide" hidden>Meer laden</button>
+    </section>
+
+    <!-- Bronnen -->
+    <section id="view-sources" hidden>
+      <div class="list-header">
+        <span id="sources-count"></span>
+        <button id="add-source" class="primary">+ Bron toevoegen</button>
+      </div>
+      <ul id="sources" class="sources"></ul>
+    </section>
+  </main>
+
+  <!-- Bron bewerken -->
+  <dialog id="source-dialog">
+    <form id="source-form" method="dialog">
+      <h2 id="source-dialog-title">Bron</h2>
+      <input type="hidden" name="source_id">
+      <label>Naam <input name="name" required></label>
+      <div class="row">
+        <label>Type
+          <select name="type">
+            <option value="rss">rss (feed)</option>
+            <option value="github">github (releases)</option>
+            <option value="page">page (pagina zonder feed)</option>
+          </select>
+        </label>
+        <label>Categorie <input name="category" list="category-list" required></label>
+      </div>
+      <datalist id="category-list"></datalist>
+      <label>URL <input name="url" required placeholder="https://… of owner/repo"></label>
+      <label>Trefwoorden: alleen als het één van deze bevat <input name="include_keywords" placeholder="AI, privacy (leeg = alles)"></label>
+      <label>Trefwoorden: overslaan als het één van deze bevat <input name="exclude_keywords" placeholder="vacature, webinar"></label>
+      <fieldset class="page-only">
+        <legend>Alleen voor type page</legend>
+        <label>CSS-selector <input name="selector" placeholder=".content"></label>
+        <label>Patroon per item (regex) <input name="item_pattern" placeholder="^\d+\.\d+(\.\d+)?$"></label>
+        <p class="hint">Test een pagina eerst met: <code>python -m monitor test page &lt;url&gt; --selector … --patroon …</code></p>
+      </fieldset>
+      <label>Notities <textarea name="notes" rows="2"></textarea></label>
+      <label class="check"><input type="checkbox" name="active"> Actief</label>
+      <div class="dialog-buttons">
+        <button type="button" id="delete-source" class="danger">Verwijderen</button>
+        <span class="spacer"></span>
+        <button type="button" id="cancel-source" class="secondary">Annuleren</button>
+        <button type="submit" class="primary">Opslaan</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
