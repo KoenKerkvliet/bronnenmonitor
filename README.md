@@ -3,7 +3,7 @@
 Persoonlijke monitor die nieuws en changelogs volgt (Kennisnet, WordPress, Bricks, Bricksforge, Etch),
 filtert, opslaat in Supabase en een digest per mail stuurt.
 
-> Status: **fase 1** – database + ophalen van rss/github-bronnen. Mail, dashboard en GitHub Actions volgen.
+> Status: **fase 2** – database + ophalen van rss-, github- en page-bronnen. Mail, dashboard en GitHub Actions volgen.
 
 ## Hoe het werkt
 
@@ -19,7 +19,28 @@ Brontypes:
 |----------|---------------------------------------|---------------------------------------|
 | `rss`    | RSS- of Atom-feed                     | de feed-URL                           |
 | `github` | releases van een GitHub-repo          | `owner/repo` of de repo-URL           |
-| `page`   | gewone pagina zonder feed (fase 2)    | pagina-URL + CSS-selector + patroon   |
+| `page`   | gewone pagina zonder feed             | pagina-URL + CSS-selector + patroon   |
+
+### Page-bronnen instellen
+
+Een page-bron heeft twee extra velden: `selector` (CSS, welk deel van de pagina) en
+`item_pattern` (regex, wat één item is). Er zijn twee modi:
+
+- **Koppenmodus**: elke kop (h1–h6) binnen de selector waarvan de tekst volledig op het patroon
+  past, is een item. De koptekst is de sleutel; de tekst eronder wordt de samenvatting.
+  Bricksforge: selector `.brxe-post-content`, patroon `^\d+\.\d+(\.\d+)?$`.
+- **Linkmodus**: levert de selector alleen links (`<a>`) op, dan is elke link waarvan de href
+  of tekst op het patroon past een item. Etch-index als reserve:
+  selector `a[href*='/changelog/']`, patroon `/changelog/\d+-\d+-\d+/?$`.
+
+Probeer een pagina altijd eerst met het testcommando. Het meldt of de inhoud echt in de HTML staat:
+
+```bash
+python -m monitor test page https://bricksforge.io/version-changelog/ --selector ".brxe-post-content" --patroon "^\d+\.\d+(\.\d+)?$"
+```
+
+Vindt een page-bron niets meer, dan komt dat als fout bij de bron (`last_error`). Meestal is de
+site aangepast, of laadt de inhoud via JavaScript.
 
 **Nulmeting:** de eerste keer dat een bron lukt, worden alle bestaande items opgeslagen als
 `is_baseline` en nooit gemaild. Pas daarna telt iets als "nieuw".
@@ -71,4 +92,4 @@ Fouten per bron komen in `sources.last_error`; één kapotte bron stopt de run n
 | Kennisnet nieuws    | rss  | https://www.kennisnet.nl/nieuws/feed/ |
 | Bricks Builder      | rss  | https://bricksbuilder.io/feed/?post_type=release (verborgen, ongedocumenteerd) |
 | Etch                | rss  | https://etchwp.com/feed/?post_type=changelog (verborgen, ongedocumenteerd) |
-| Bricksforge         | page | https://bricksforge.io/version-changelog/ (fase 2) |
+| Bricksforge         | page | https://bricksforge.io/version-changelog/ (alleen de laatste 3 versies staan erop) |
