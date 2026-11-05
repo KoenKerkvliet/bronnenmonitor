@@ -88,9 +88,10 @@
       <label>Trefwoorden: overslaan als het één van deze bevat <input name="exclude_keywords" placeholder="vacature, webinar"></label>
       <fieldset class="page-only">
         <legend>Alleen voor type page</legend>
-        <label>CSS-selector <input name="selector" placeholder=".content"></label>
-        <label>Patroon per item (regex) <input name="item_pattern" placeholder="^\d+\.\d+(\.\d+)?$"></label>
-        <p class="hint">Test een pagina eerst met: <code>python -m monitor test page &lt;url&gt; --selector … --patroon …</code></p>
+        <label>CSS-selector <input name="selector" placeholder="article.card  of  .content"></label>
+        <label>Patroon per item (regex, optioneel bij kaarten en links) <input name="item_pattern" placeholder="^\d+\.\d+(\.\d+)?$"></label>
+        <p class="hint">Selector vindt meerdere blokken → kaartmodus. Alleen links → linkmodus. Eén gebied → koppenmodus (patroon verplicht).
+          Test een pagina eerst met: <code>python -m monitor test page &lt;url&gt; --selector …</code></p>
       </fieldset>
       <label>Notities <textarea name="notes" rows="2"></textarea></label>
       <label class="check"><input type="checkbox" name="active"> Actief</label>

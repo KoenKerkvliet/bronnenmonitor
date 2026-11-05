@@ -211,8 +211,8 @@ async function saveSource(event) {
     notes: form.notes.value.trim() || null,
     active: form.active.checked,
   };
-  if (row.type === "page" && !row.item_pattern) {
-    notify("Een page-bron heeft een patroon (regex) nodig.", true);
+  if (row.type === "page" && !row.selector) {
+    notify("Een page-bron heeft een CSS-selector nodig.", true);
     return;
   }
   const id = form.source_id.value;

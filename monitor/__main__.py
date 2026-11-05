@@ -24,7 +24,12 @@ def cmd_test(source_type: str, url: str, selector: str | None = None, pattern: s
         print(f"✘ {type(exc).__name__}: {exc}")
         return 1
     if source_type == "page":
-        print("HTML-check: ✔ de inhoud staat in de HTML (niet alleen via JavaScript geladen)")
+        from bs4 import BeautifulSoup
+        from . import http
+        from .fetchers.page import detect_mode
+        soup = BeautifulSoup(http.get(url).content, "html.parser")
+        mode = detect_mode(soup.select(selector) if selector else [soup])
+        print(f"HTML-check: ✔ de inhoud staat in de HTML (niet alleen via JavaScript geladen) — {mode}modus")
     print(f"{len(items)} items gevonden\n")
     for item in items[:15]:
         flag = "‼ URGENT " if filters.is_urgent(item) else ""

@@ -4,7 +4,7 @@ Persoonlijke monitor die nieuws en changelogs volgt, filtert, opslaat in Supabas
 direct bij urgente berichten (security, kritiek…) en wekelijks een digest.
 
 - **Dashboard:** https://koenkerkvliet.github.io/bronnenmonitor/
-- **Bronnen nu:** Kennisnet (artikelen + nieuws), WordPress News, Bricks Builder, Etch, Bricksforge
+- **Bronnen nu:** Kennisnet (artikelen + nieuws), AOb, PO-Raad, WordPress News, Bricks Builder, Etch, Bricksforge
 
 ## Hoe het werkt
 
@@ -129,8 +129,13 @@ Dashboard lokaal: `python -m http.server 5500 --directory web` en open http://lo
 
 ### Page-bronnen (pagina zonder feed)
 
-Twee extra velden: `selector` (CSS, welk deel van de pagina) en `item_pattern` (regex, wat één item is).
+Twee extra velden: `selector` (CSS) en `item_pattern` (regex, wat één item is). De modus volgt
+uit wat de selector vindt; het testcommando laat zien welke modus gekozen is.
 
+- **Kaartmodus:** de selector vindt meerdere blokken (nieuwskaarten). Elk blok is één item:
+  titel (kop of element met "title" in de class), link, datum, intro en labels (als tags).
+  Patroon optioneel (moet dan op de link passen).
+  AOb: selector `a.card`. PO-Raad: selector `article.node-article-card`.
 - **Koppenmodus:** elke kop (h1–h6) binnen de selector waarvan de tekst volledig op het patroon
   past, is een item; de tekst eronder wordt de samenvatting.
   Bricksforge: selector `.brxe-post-content`, patroon `^\d+\.\d+(\.\d+)?$`.
@@ -157,6 +162,8 @@ dan verschijnt dat als fout bij de bron: meestal is de site aangepast of laadt d
 | WordPress News | rss | https://wordpress.org/news/feed/ | |
 | Kennisnet artikelen | rss | https://www.kennisnet.nl/feed/ | thema-feeds bestaan niet; categorie komt als tag mee |
 | Kennisnet nieuws | rss | https://www.kennisnet.nl/nieuws/feed/ | |
+| AOb | page | https://www.aob.nl/actueel/artikelen/ | geen feed; kaartmodus; sector als tag |
+| PO-Raad | page | https://www.poraad.nl/nieuws | geen feed (Drupal); kaartmodus |
 | Bricks Builder | rss | https://bricksbuilder.io/feed/?post_type=release | verborgen feed; reserve: page op /changelog/ |
 | Etch | rss | https://etchwp.com/feed/?post_type=changelog | verborgen feed; reserve: page op /changelog/ |
 | Bricksforge | page | https://bricksforge.io/version-changelog/ | alleen de laatste 3 versies staan op de pagina |
