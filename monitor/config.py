@@ -9,6 +9,13 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 # Service role key (eyJ...) óf de nieuwe secret key (sb_secret_...). Nooit in de frontend gebruiken!
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
+# Mail via Emailit (fase 3)
+EMAILIT_API_KEY = os.getenv("EMAILIT_API_KEY", "")
+EMAILIT_FROM = os.getenv("EMAILIT_FROM", "Bronnenmonitor <monitor@digest.designpixels.nl>")
+EMAILIT_TO = os.getenv("EMAILIT_TO", "")            # ontvanger van digest en urgent-mails
+EMAILIT_REPLY_TO = os.getenv("EMAILIT_REPLY_TO", "")
+DASHBOARD_URL = os.getenv("DASHBOARD_URL", "https://koenkerkvliet.github.io/bronnenmonitor/")
+
 # Netjes ophalen
 USER_AGENT = "Bronnenmonitor/1.0 (+https://github.com/KoenKerkvliet/bronnenmonitor)"
 TIMEOUT_SECONDS = 20
@@ -31,4 +38,11 @@ URGENT_KEYWORDS = [
     "kwetsba*",
     "beveiligingslek*",
     "datalek*",
+]
+
+# Zinnen die eerst uit de tekst worden gehaald, zodat ze geen vals alarm geven.
+# Bijv. elke WordPress-beta waarschuwt: "do not install on mission-critical websites".
+URGENT_IGNORE = [
+    "mission-critical",
+    "mission critical",
 ]

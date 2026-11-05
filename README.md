@@ -3,7 +3,7 @@
 Persoonlijke monitor die nieuws en changelogs volgt (Kennisnet, WordPress, Bricks, Bricksforge, Etch),
 filtert, opslaat in Supabase en een digest per mail stuurt.
 
-> Status: **fase 2** – database + ophalen van rss-, github- en page-bronnen. Mail, dashboard en GitHub Actions volgen.
+> Status: **fase 3** – ophalen (rss, github, page), opslag en mail (urgent + weekdigest). Dashboard en GitHub Actions volgen.
 
 ## Hoe het werkt
 
@@ -46,7 +46,14 @@ site aangepast, of laadt de inhoud via JavaScript.
 `is_baseline` en nooit gemaild. Pas daarna telt iets als "nieuw".
 
 **Urgent:** een item is urgent als titel, samenvatting of tags een woord uit `URGENT_KEYWORDS`
-in [monitor/config.py](monitor/config.py) bevat.
+in [monitor/config.py](monitor/config.py) bevat. Zinnen in `URGENT_IGNORE` tellen niet mee
+(bijv. "mission-critical" uit de standaardwaarschuwing bij WordPress-beta's).
+
+**Mail:**
+- *Urgent-mail*: direct na een ophaalrun, één mail met alle nog niet gemelde urgente items.
+  Mislukt het versturen, dan gaat de mail bij de volgende run alsnog.
+- *Weekdigest*: alle nieuwe items sinds de vorige digest, gegroepeerd per categorie (urgente
+  items staan erin met een label). Niets nieuws = geen mail.
 
 ## Setup (fase 1)
 
@@ -82,6 +89,22 @@ python -m monitor fetch --bron "Etch"                          # één bron
 ```
 
 Fouten per bron komen in `sources.last_error`; één kapotte bron stopt de run niet.
+
+```bash
+python -m monitor testmail                     # controleert of Emailit werkt
+python -m monitor digest --voorbeeld           # digest als voorbeeld-mail.html, zonder versturen
+python -m monitor digest --voorbeeld --alles   # idem, inclusief nulmeting-items (om de opmaak te zien)
+python -m monitor digest                       # digest echt versturen
+```
+
+### 4. Mail (Emailit)
+
+Verzenddomein: `digest.designpixels.nl` (geverifieerd in Emailit; DNS bij Hostinger:
+MX + SPF op `emailit.digest`, DKIM op `emailit._domainkey.digest`, DMARC op `_dmarc.digest`).
+
+Vul in `.env` in: `EMAILIT_API_KEY` (Emailit → API Keys, rechten "Sending" volstaan) en
+`EMAILIT_TO` (je ontvangstadres). `EMAILIT_FROM` staat standaard op
+`Bronnenmonitor <monitor@digest.designpixels.nl>`.
 
 ## Bronnen (geverifieerd 2026-11-05)
 

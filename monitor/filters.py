@@ -33,4 +33,7 @@ def passes_filters(item: Item, source: dict) -> bool:
 
 
 def is_urgent(item: Item) -> bool:
-    return matches_any(item, config.URGENT_KEYWORDS)
+    text = _text(item)
+    for phrase in config.URGENT_IGNORE:
+        text = re.sub(re.escape(phrase), " ", text, flags=re.IGNORECASE)
+    return any(_pattern(w).search(text) for w in config.URGENT_KEYWORDS)

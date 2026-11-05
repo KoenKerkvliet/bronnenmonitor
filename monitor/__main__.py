@@ -2,6 +2,9 @@
 
   python -m monitor fetch                  alle actieve bronnen ophalen en opslaan
   python -m monitor fetch --bron "Etch"    één bron (op naam)
+  python -m monitor digest                 wekelijkse digest versturen (niets nieuws = geen mail)
+  python -m monitor digest --voorbeeld     digest als HTML-bestand bekijken, zonder versturen
+  python -m monitor testmail               testmail om Emailit te controleren
   python -m monitor test rss <url>         een bron proberen zónder database (handig vóór toevoegen)
   python -m monitor test page <url> --selector ".content" --patroon "^\\d+\\.\\d+(\\.\\d+)?$"
 """
@@ -49,7 +52,23 @@ def main() -> int:
     p_test.add_argument("--selector", help="page: CSS-selector van het relevante deel")
     p_test.add_argument("--patroon", help="page: regex voor één item (bijv. een versienummer)")
 
+    p_digest = sub.add_parser("digest", help="wekelijkse digest versturen")
+    p_digest.add_argument("--voorbeeld", action="store_true", help="niet versturen, alleen HTML-bestand maken")
+    p_digest.add_argument("--alles", action="store_true", help="ook nulmeting-items meenemen (alleen met --voorbeeld)")
+
+    sub.add_parser("testmail", help="testmail versturen om Emailit te controleren")
+
     args = parser.parse_args()
+    if args.command == "digest":
+        from . import notify
+        if args.alles and not args.voorbeeld:
+            parser.error("--alles kan alleen samen met --voorbeeld")
+        notify.send_digest(preview=args.voorbeeld, include_baseline=args.alles)
+        return 0
+    if args.command == "testmail":
+        from . import notify
+        notify.send_test()
+        return 0
     if args.command == "fetch":
         from . import fetch
         fetch.run(args.bron)

@@ -61,5 +61,12 @@ def run(only: str | None = None) -> list[dict]:
 
     urgent = [r for r in all_new if r["is_urgent"] and not r["is_baseline"]]
     print(f"Klaar: {len(all_new)} nieuwe items, waarvan {len(urgent)} urgent.")
-    # Fase 3: hier komt het versturen van de urgent-mail.
+
+    # Urgent-mail. Kijkt naar álle nog niet gemelde urgente items, dus als een eerdere
+    # mail mislukte, gaat die alsnog mee.
+    from . import notify
+    try:
+        notify.send_urgent()
+    except Exception as exc:
+        print(f"‼ Urgent-mail mislukt: {exc}")
     return all_new

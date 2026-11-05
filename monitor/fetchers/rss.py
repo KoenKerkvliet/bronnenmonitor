@@ -1,10 +1,15 @@
 """RSS- en Atom-feeds."""
+import re
 from datetime import datetime, timezone
 
 import feedparser
 
 from .. import http
 from . import Item, clean_text, make_key
+
+# Standaardzinnen die WordPress-feeds onder elk bericht zetten; die willen we niet in de samenvatting.
+BOILERPLATE = re.compile(r"\s*(Lees dit artikel op:|The post .{0,200}? appeared first on|Continue reading|Lees verder\b).*$",
+                         re.IGNORECASE | re.DOTALL)
 
 
 def _date(entry) -> datetime | None:
@@ -33,7 +38,7 @@ def parse_feed(content: bytes) -> list[Item]:
                 item_key=key,
                 title=title,
                 url=link,
-                summary=clean_text(summary),
+                summary=BOILERPLATE.sub("", clean_text(summary)),
                 published_at=_date(entry),
                 tags=tags,
             )

@@ -50,6 +50,33 @@ def update_source(source_id: str, fields: dict) -> None:
 
 # --- items -----------------------------------------------------------------
 
+ITEM_FIELDS = "id,title,url,summary,published_at,found_at,is_urgent,tags,sources(name,category)"
+
+
+def items_for_digest(include_baseline: bool = False) -> list[dict]:
+    """Nog niet in een digest verstuurde items (nulmeting-items standaard niet)."""
+    params = {"select": ITEM_FIELDS, "digest_id": "is.null", "order": "found_at"}
+    if not include_baseline:
+        params["is_baseline"] = "is.false"
+    return _request("GET", "items", params=params)
+
+
+def urgent_items_to_send() -> list[dict]:
+    """Urgente items waarvoor nog geen urgent-mail is verstuurd."""
+    params = {"select": ITEM_FIELDS, "is_urgent": "is.true", "is_baseline": "is.false",
+              "urgent_sent_at": "is.null", "order": "found_at"}
+    return _request("GET", "items", params=params)
+
+
+def update_items(ids: list[str], fields: dict) -> None:
+    if ids:
+        _request("PATCH", "items", params={"id": f"in.({','.join(ids)})"}, json=fields)
+
+
+def record_digest(kind: str, item_count: int) -> str:
+    rows = _request("POST", "digests", json={"kind": kind, "item_count": item_count}, prefer="return=representation")
+    return rows[0]["id"]
+
 def insert_new_items(rows: list[dict]) -> list[dict]:
     """Voegt items toe en slaat bestaande (source_id, item_key) over.
     Geeft alleen de écht nieuwe rijen terug."""
