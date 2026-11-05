@@ -76,9 +76,27 @@ const toList = (text) => text.split(",").map((s) => s.trim()).filter(Boolean);
 // Inloggen
 // ---------------------------------------------------------------------------
 
-async function sendMagicLink(event) {
+async function signInWithPassword(event) {
   event.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({
+    email: $("#login-email").value.trim(),
+    password: $("#login-password").value,
+  });
+  if (error) {
+    const message = error.message === "Invalid login credentials"
+      ? "E-mailadres of wachtwoord klopt niet. Nog geen wachtwoord ingesteld? Vraag dan een inloglink aan."
+      : `Inloggen mislukt: ${error.message}`;
+    notify(message, true);
+  }
+}
+
+async function sendMagicLink() {
   const email = $("#login-email").value.trim();
+  if (!email || !$("#login-email").checkValidity()) {
+    notify("Vul eerst je e-mailadres in.", true);
+    $("#login-email").focus();
+    return;
+  }
   const { error } = await sb.auth.signInWithOtp({
     email,
     options: {
@@ -90,9 +108,32 @@ async function sendMagicLink(event) {
   else notify("Check je mail en klik op de inloglink.");
 }
 
+async function savePassword(event) {
+  event.preventDefault();
+  const form = event.target.elements;
+  if (form.password.value !== form.repeat.value) {
+    notify("De twee wachtwoorden zijn niet gelijk.", true);
+    return;
+  }
+  const { error } = await sb.auth.updateUser({ password: form.password.value });
+  if (error) {
+    notify(`Wachtwoord opslaan mislukt: ${error.message}`, true);
+    return;
+  }
+  $("#password-dialog").close();
+  notify("Wachtwoord opgeslagen. Voortaan kun je hiermee inloggen.");
+}
+
+async function openPasswordDialog() {
+  $("#password-form").reset();
+  const { data } = await sb.auth.getUser();
+  $("#password-username").value = data?.user?.email || "";
+  $("#password-dialog").showModal();
+}
+
 async function onSignedIn() {
   $("#tabs").hidden = false;
-  $("#logout").hidden = false;
+  $("#account").hidden = false;
   const { data: allowed, error } = await sb.rpc("is_allowed");
   if (error || !allowed) {
     show("login");
@@ -108,7 +149,7 @@ async function onSignedIn() {
 
 function onSignedOut() {
   $("#tabs").hidden = true;
-  $("#logout").hidden = true;
+  $("#account").hidden = true;
   show("login");
 }
 
@@ -356,8 +397,12 @@ function init() {
   }
   sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  $("#login-form").addEventListener("submit", sendMagicLink);
+  $("#login-form").addEventListener("submit", signInWithPassword);
+  $("#magic-link").addEventListener("click", sendMagicLink);
   $("#logout").addEventListener("click", () => sb.auth.signOut());
+  $("#open-password").addEventListener("click", openPasswordDialog);
+  $("#password-form").addEventListener("submit", savePassword);
+  $("#cancel-password").addEventListener("click", () => $("#password-dialog").close());
   document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => show(tab.dataset.view)));
 
   for (const id of ["#f-status", "#f-category", "#f-source", "#f-tag"]) $(id).addEventListener("change", () => loadItems(true));

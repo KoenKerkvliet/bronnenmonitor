@@ -49,7 +49,10 @@ body {
   padding: 6px 12px; font: inherit; cursor: pointer; opacity: .8;
 }
 .tab.active { background: rgba(255,255,255,.2); opacity: 1; font-weight: 600; }
-#logout { margin-left: auto; color: #fff; }
+.account { margin-left: auto; display: flex; gap: 14px; }
+.account .link { color: #fff; }
+#login-form .wide { margin-top: 16px; }
+#view-login .hint { margin-top: 16px; }
 
 main { max-width: 860px; margin: 0 auto; padding: 16px; }
 

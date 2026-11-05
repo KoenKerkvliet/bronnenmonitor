@@ -16,7 +16,10 @@
       <button class="tab active" data-view="items">Berichten</button>
       <button class="tab" data-view="sources">Bronnen</button>
     </nav>
-    <button id="logout" class="link" hidden>Uitloggen</button>
+    <span class="account" id="account" hidden>
+      <button id="open-password" class="link">Wachtwoord</button>
+      <button id="logout" class="link">Uitloggen</button>
+    </span>
   </header>
 
   <main>
@@ -26,12 +29,16 @@
     <!-- Inloggen -->
     <section id="view-login" class="card narrow" hidden>
       <h2>Inloggen</h2>
-      <p>Je krijgt een inloglink per mail.</p>
       <form id="login-form">
         <label for="login-email">E-mailadres</label>
-        <input id="login-email" type="email" required autocomplete="email">
-        <button type="submit" class="primary">Stuur inloglink</button>
+        <input id="login-email" name="email" type="email" required autocomplete="username">
+        <label for="login-password">Wachtwoord</label>
+        <input id="login-password" name="password" type="password" required autocomplete="current-password">
+        <button type="submit" class="primary wide">Inloggen</button>
       </form>
+      <p class="hint">Wachtwoord vergeten of nog niet ingesteld?
+        <button id="magic-link" type="button" class="link">Stuur me een inloglink</button>
+        en stel daarna via <strong>Wachtwoord</strong> (rechtsboven) een wachtwoord in.</p>
     </section>
 
     <!-- Berichten -->
@@ -65,6 +72,23 @@
       <ul id="sources" class="sources"></ul>
     </section>
   </main>
+
+  <!-- Wachtwoord instellen of wijzigen -->
+  <dialog id="password-dialog">
+    <form id="password-form" method="dialog">
+      <h2>Wachtwoord instellen</h2>
+      <p class="hint">Daarna kun je inloggen met je e-mailadres en dit wachtwoord. Minimaal 10 tekens.</p>
+      <!-- verborgen gebruikersnaam, zodat een wachtwoordmanager weet bij welk account dit hoort -->
+      <input id="password-username" type="email" autocomplete="username" hidden>
+      <label>Nieuw wachtwoord <input name="password" type="password" required minlength="10" autocomplete="new-password"></label>
+      <label>Herhaal wachtwoord <input name="repeat" type="password" required minlength="10" autocomplete="new-password"></label>
+      <div class="dialog-buttons">
+        <span class="spacer"></span>
+        <button type="button" id="cancel-password" class="secondary">Annuleren</button>
+        <button type="submit" class="primary">Opslaan</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Bron bewerken -->
   <dialog id="source-dialog">
