@@ -1,0 +1,26 @@
+# GitHub zet geplande workflows in een publieke repo uit na 60 dagen zonder activiteit in de repo.
+# Deze workflow zet ze elke week opnieuw aan via de GitHub-API. Dat reset de teller,
+# zonder lege commits in je geschiedenis.
+name: Keepalive
+
+on:
+  schedule:
+    - cron: "30 4 * * 0"   # zondag 04:30 UTC
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Geplande workflows opnieuw aanzetten
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in fetch.yml digest.yml keepalive.yml; do
+            gh api --method PUT "repos/${{ github.repository }}/actions/workflows/$wf/enable"
+            echo "✔ $wf staat aan"
+          done
