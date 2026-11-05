@@ -60,9 +60,38 @@ function notify(message, isError = false) {
 
 function check({ error }) {
   if (error) {
-    notify(`Er ging iets mis: ${error.message}`, true);
+    notify(navigator.onLine ? `Er ging iets mis: ${error.message}` : "Geen internetverbinding. Probeer het opnieuw als je weer online bent.", true);
     throw error;
   }
+}
+
+// ---------------------------------------------------------------------------
+// App (PWA): service worker, installeren en offline-melding
+// ---------------------------------------------------------------------------
+
+function setupPwa() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch((err) => console.warn("Service worker niet geregistreerd:", err));
+  }
+
+  // Chrome/Edge/Android: eigen installatieknop. (iPhone: Deel → Zet op beginscherm.)
+  let installEvent = null;
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installEvent = event;
+    $("#install").hidden = false;
+  });
+  $("#install").addEventListener("click", async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    await installEvent.userChoice;
+    installEvent = null;
+    $("#install").hidden = true;
+  });
+  window.addEventListener("appinstalled", () => ($("#install").hidden = true));
+
+  window.addEventListener("offline", () => notify("Je bent offline. Nieuwe berichten laden lukt pas weer met verbinding.", true));
+  window.addEventListener("online", () => notify("Weer online."));
 }
 
 function show(view) {
@@ -391,6 +420,7 @@ function debounce(fn, ms) {
 }
 
 function init() {
+  setupPwa();
   if (!SUPABASE_ANON_KEY) {
     notify("Vul de publishable/anon key in web/config.js in.", true);
     return;

@@ -119,6 +119,20 @@ python -m monitor digest                       # digest echt versturen
 
 Dashboard lokaal: `python -m http.server 5500 --directory web` en open http://localhost:5500/.
 
+### Dashboard als app (PWA)
+
+Het dashboard is te installeren als app:
+- **Android / Chrome / Edge:** knop **App installeren** rechtsboven, of browsermenu → *App installeren*.
+- **iPhone / iPad (Safari):** Deel-knop → **Zet op beginscherm**.
+
+Inloggen in de geïnstalleerde app gaat het makkelijkst met e-mail + wachtwoord (een inloglink
+opent op iPhone in Safari in plaats van in de app).
+
+De service worker ([web/sw.js](web/sw.js)) laat de app ook zonder verbinding opstarten; berichten
+laden kan dan niet. Eigen bestanden worden altijd eerst van het netwerk gehaald, dus een update
+is meteen zichtbaar. Voeg je bestanden toe aan de app, zet ze dan in `APP_SHELL` en verhoog `CACHE`
+(`bronnenmonitor-v2`). Iconen staan in `web/icons/`.
+
 ### Een bron toevoegen
 
 1. Zoek een feed. Tip voor WordPress-sites zonder zichtbare feed: probeer

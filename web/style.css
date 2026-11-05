@@ -39,9 +39,16 @@ body {
 .topbar {
   position: sticky; top: 0; z-index: 5;
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  padding: 10px 16px;
+  /* env(): ruimte voor de notch/statusbalk als de app geïnstalleerd is (iPhone) */
+  padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
   background: var(--accent); color: #fff;
 }
+.install {
+  margin-left: auto; background: #fff; color: var(--accent); font-weight: 600;
+  padding: 4px 10px; font-size: 13px;
+}
+.install:not([hidden]) + .account { margin-left: 0; }
+main { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .topbar h1 { margin: 0; font-size: 18px; }
 .topbar nav { display: flex; gap: 4px; }
 .tab {
