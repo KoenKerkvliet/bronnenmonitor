@@ -104,10 +104,9 @@ code { font-size: 12px; background: var(--chip); padding: 1px 5px; border-radius
 
 /* ---------- merk ---------- */
 .brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 0; flex: none; }
-.brand-mark {
-  width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: #fff;
-  display: grid; place-items: center; font-family: "Instrument Serif", serif; font-size: 20px; line-height: 1;
-}
+/* logo = het app-icoon; dun randje zodat de lichte tegel ook op de lichte zijbalk zichtbaar is */
+.brand-mark { width: 30px; height: 30px; flex: none; display: block; border-radius: 7px; box-shadow: 0 0 0 1px var(--line-strong); }
+.login-card .brand-mark { width: 36px; height: 36px; border-radius: 8px; }
 .brand-name { font-family: "Instrument Serif", serif; font-size: 26px; letter-spacing: -0.01em; line-height: 1; }
 
 /* ---------- inloggen ---------- */
