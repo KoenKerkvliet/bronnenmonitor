@@ -6,7 +6,7 @@
 // - Supabase zelf (je data en inloggen): nooit cachen, altijd rechtstreeks.
 //
 // Pas CACHE aan als je bestanden toevoegt of verwijdert uit de lijst hieronder.
-const CACHE = "bronnenmonitor-v3";
+const CACHE = "bronnenmonitor-v4";
 const CACHE_FIRST_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 const APP_SHELL = [
   "./",
