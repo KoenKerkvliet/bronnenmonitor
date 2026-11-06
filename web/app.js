@@ -225,6 +225,22 @@ async function sendMagicLink() {
   else loginNotice("Check je mail en klik op de inloglink.");
 }
 
+/**
+ * Komt je via een inloglink binnen en ging er iets mis (verlopen, al gebruikt), dan zet Supabase
+ * de fout in het adres (#error=…&error_code=otp_expired). Toon die in gewone taal en haal hem weg.
+ */
+function showLinkError() {
+  const params = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
+  const code = params.get("error_code") || params.get("error");
+  if (!code) return;
+  const messages = {
+    otp_expired: "Deze inloglink is verlopen of al eens gebruikt (een link werkt maar één keer en maximaal een uur). Log in met je wachtwoord, of vraag hieronder een nieuwe link aan en open die meteen.",
+    access_denied: "Inloggen via deze link is geweigerd. Vraag een nieuwe link aan, of log in met je wachtwoord.",
+  };
+  loginNotice(messages[code] || `Inloggen via de link lukte niet: ${params.get("error_description") || code}`, true);
+  history.replaceState(null, "", location.pathname);
+}
+
 /** Meldingen op het inlogscherm (de gewone melding zit in de app, die dan verborgen is). */
 function loginNotice(message, isError = false) {
   let box = $("#login-notice");
@@ -609,6 +625,7 @@ function init() {
     loginNotice("Vul de publishable/anon key in web/config.js in.", true);
     return;
   }
+  showLinkError();
   sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // inloggen en account
