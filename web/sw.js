@@ -2,11 +2,12 @@
 //
 // - Eigen bestanden (HTML, CSS, JS): eerst netwerk, bij geen verbinding uit de cache.
 //   Zo krijg je na een wijziging altijd meteen de nieuwe versie.
-// - supabase-js van de CDN: uit de cache (de URL bevat een vast versienummer).
+// - supabase-js van de CDN en de Google Fonts: uit de cache (veranderen niet).
 // - Supabase zelf (je data en inloggen): nooit cachen, altijd rechtstreeks.
 //
 // Pas CACHE aan als je bestanden toevoegt of verwijdert uit de lijst hieronder.
-const CACHE = "bronnenmonitor-v1";
+const CACHE = "bronnenmonitor-v2";
+const CACHE_FIRST_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -41,8 +42,8 @@ self.addEventListener("fetch", (event) => {
   // Data en inloggen: nooit via de cache
   if (url.hostname.endsWith(".supabase.co")) return;
 
-  // Bibliotheken van de CDN: cache eerst
-  if (url.hostname === "cdn.jsdelivr.net") {
+  // Bibliotheken en lettertypen: cache eerst
+  if (CACHE_FIRST_HOSTS.includes(url.hostname)) {
     event.respondWith(
       caches.match(request).then((cached) => cached || fetch(request).then((response) => {
         const copy = response.clone();

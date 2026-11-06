@@ -5,86 +5,172 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Bronnenmonitor</title>
-  <meta name="theme-color" content="#5b3fd1">
+  <meta name="theme-color" content="#f3f2ee">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Bronnen">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
   <link rel="stylesheet" href="style.css">
+  <!-- Thema direct zetten, vóór het tekenen (voorkomt een witte flits in donkere modus) -->
+  <script>
+    try {
+      const t = localStorage.getItem("bm-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.dataset.theme = t;
+    } catch (e) { document.documentElement.dataset.theme = "light"; }
+  </script>
   <script type="module" src="app.js"></script>
 </head>
-<body>
-  <header class="topbar">
-    <h1>Bronnenmonitor</h1>
-    <nav id="tabs" hidden>
-      <button class="tab active" data-view="items">Berichten</button>
-      <button class="tab" data-view="sources">Bronnen</button>
-    </nav>
-    <button id="install" class="install" hidden>App installeren</button>
-    <span class="account" id="account" hidden>
-      <button id="open-password" class="link">Wachtwoord</button>
-      <button id="logout" class="link">Uitloggen</button>
-    </span>
-  </header>
+<body class="signed-out">
 
-  <main>
-    <!-- Melding (fouten, bevestigingen) -->
-    <div id="notice" class="notice" hidden></div>
-
-    <!-- Inloggen -->
-    <section id="view-login" class="card narrow" hidden>
-      <h2>Inloggen</h2>
+  <!-- ===================== Inloggen ===================== -->
+  <section id="view-login" class="login">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div class="brand-name">Bronnenmonitor</div>
+      </div>
+      <h1 class="serif login-title">Welkom terug</h1>
       <form id="login-form">
         <label for="login-email">E-mailadres</label>
         <input id="login-email" name="email" type="email" required autocomplete="username">
         <label for="login-password">Wachtwoord</label>
         <input id="login-password" name="password" type="password" required autocomplete="current-password">
-        <button type="submit" class="primary wide">Inloggen</button>
+        <button type="submit" class="btn-primary wide">Inloggen</button>
       </form>
       <p class="hint">Wachtwoord vergeten of nog niet ingesteld?
         <button id="magic-link" type="button" class="link">Stuur me een inloglink</button>
-        en stel daarna via <strong>Wachtwoord</strong> (rechtsboven) een wachtwoord in.</p>
-    </section>
+        en stel daarna via het sleutel-icoon een wachtwoord in.</p>
+    </div>
+  </section>
 
-    <!-- Berichten -->
-    <section id="view-items" hidden>
-      <form id="filters" class="filters">
-        <input id="f-search" type="search" placeholder="Zoeken in titel en tekst…" aria-label="Zoeken">
-        <select id="f-status" aria-label="Status">
-          <option value="">Alle berichten</option>
-          <option value="unread">Ongelezen</option>
-          <option value="saved">Bewaard</option>
-          <option value="urgent">Urgent</option>
-        </select>
-        <select id="f-category" aria-label="Categorie"><option value="">Alle categorieën</option></select>
-        <select id="f-source" aria-label="Bron"><option value="">Alle bronnen</option></select>
-        <select id="f-tag" aria-label="Tag"><option value="">Alle tags</option></select>
-      </form>
-      <div class="list-header">
-        <span id="items-count"></span>
-        <button id="mark-all-read" class="link">Zichtbare als gelezen markeren</button>
+  <!-- ===================== App ===================== -->
+  <div class="app" id="app">
+    <div class="scrim" id="scrim"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div class="brand-name">Bronnenmonitor</div>
       </div>
-      <ul id="items" class="items"></ul>
-      <button id="load-more" class="secondary wide" hidden>Meer laden</button>
-    </section>
 
-    <!-- Bronnen -->
-    <section id="view-sources" hidden>
-      <div class="list-header">
-        <span id="sources-count"></span>
-        <button id="add-source" class="primary">+ Bron toevoegen</button>
+      <nav class="nav">
+        <button class="nav-row" data-view="items"><span>Berichten</span><span class="count" id="nav-unread"></span></button>
+        <button class="nav-row" data-view="sources"><span>Bronnen</span><span class="count" id="nav-sources"></span></button>
+      </nav>
+
+      <div class="side-sources">
+        <div class="side-label">Bronnen</div>
+        <button class="src-row" id="all-sources">
+          <span class="mono mono-all"></span>
+          <span class="src-name">Alle bronnen</span>
+          <span class="count" id="all-unread"></span>
+        </button>
+        <div id="side-source-list"></div>
       </div>
-      <ul id="sources" class="sources"></ul>
-    </section>
-  </main>
 
-  <!-- Wachtwoord instellen of wijzigen -->
+      <div class="side-footer">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text"></span>
+      </div>
+    </aside>
+
+    <div class="column">
+      <div class="topbar">
+        <button class="icon-btn menu-btn" id="menu-btn" title="Menu" aria-label="Menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+
+        <div class="filters">
+          <div class="segmented" id="f-status" role="group" aria-label="Status">
+            <button data-status="" class="on">Alle</button>
+            <button data-status="unread">Ongelezen</button>
+            <button data-status="saved">Favoriet</button>
+            <button data-status="urgent">Urgent</button>
+          </div>
+          <select id="f-category" aria-label="Categorie"><option value="">Alle categorieën</option></select>
+          <select id="f-tag" aria-label="Tag"><option value="">Alle tags</option></select>
+        </div>
+
+        <div class="actions">
+          <button id="install" class="pill-btn install" hidden>Installeren</button>
+          <div class="search-wrap">
+            <button class="icon-btn" id="search-btn" title="Zoeken" aria-label="Zoeken">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </button>
+            <div class="search-pop" id="search-pop" hidden>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="f-search" type="search" placeholder="Zoeken in titel en tekst…" aria-label="Zoeken">
+              <button id="clear-search" class="clear" title="Wissen" hidden>×</button>
+            </div>
+          </div>
+          <button class="icon-btn" id="theme-btn" title="Donker thema" aria-label="Thema wisselen">
+            <svg class="i-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            <svg class="i-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          </button>
+          <button class="icon-btn" id="open-password" title="Wachtwoord instellen" aria-label="Wachtwoord instellen">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2"/></svg>
+          </button>
+          <button class="icon-btn quiet" id="logout" title="Uitloggen" aria-label="Uitloggen">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <main class="main">
+        <div id="notice" class="notice" hidden></div>
+
+        <!-- Berichten -->
+        <section id="view-items" hidden>
+          <header class="page-head">
+            <div class="head-text">
+              <div class="eyebrow" id="items-eyebrow">Overzicht</div>
+              <h1 class="serif page-title" id="items-title">Alle berichten</h1>
+              <div class="subtitle" id="items-subtitle"></div>
+            </div>
+            <div class="head-actions">
+              <span class="count-label" id="items-count"></span>
+              <button class="pill-btn" id="mark-all-read">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+                Zichtbare als gelezen markeren
+              </button>
+            </div>
+          </header>
+          <div class="grid" id="items"></div>
+          <div class="empty" id="items-empty" hidden>
+            <div class="serif empty-title">Niets te zien</div>
+            <div>Geen berichten die aan deze filters voldoen.</div>
+          </div>
+          <button id="load-more" class="pill-btn load-more" hidden>Meer laden</button>
+        </section>
+
+        <!-- Bronnen -->
+        <section id="view-sources" hidden>
+          <header class="page-head">
+            <div class="head-text">
+              <div class="eyebrow">Beheer</div>
+              <h1 class="serif page-title">Bronnen</h1>
+              <div class="subtitle" id="sources-subtitle"></div>
+            </div>
+            <div class="head-actions">
+              <button class="btn-primary" id="add-source">+ Bron toevoegen</button>
+            </div>
+          </header>
+          <div class="source-table" id="sources"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== Dialogen ===================== -->
   <dialog id="password-dialog">
     <form id="password-form" method="dialog">
-      <h2>Wachtwoord instellen</h2>
+      <h2 class="serif">Wachtwoord instellen</h2>
       <p class="hint">Daarna kun je inloggen met je e-mailadres en dit wachtwoord. Minimaal 10 tekens.</p>
       <!-- verborgen gebruikersnaam, zodat een wachtwoordmanager weet bij welk account dit hoort -->
       <input id="password-username" type="email" autocomplete="username" hidden>
@@ -92,16 +178,15 @@
       <label>Herhaal wachtwoord <input name="repeat" type="password" required minlength="10" autocomplete="new-password"></label>
       <div class="dialog-buttons">
         <span class="spacer"></span>
-        <button type="button" id="cancel-password" class="secondary">Annuleren</button>
-        <button type="submit" class="primary">Opslaan</button>
+        <button type="button" id="cancel-password" class="pill-btn">Annuleren</button>
+        <button type="submit" class="btn-primary">Opslaan</button>
       </div>
     </form>
   </dialog>
 
-  <!-- Bron bewerken -->
   <dialog id="source-dialog">
     <form id="source-form" method="dialog">
-      <h2 id="source-dialog-title">Bron</h2>
+      <h2 class="serif" id="source-dialog-title">Bron</h2>
       <input type="hidden" name="source_id">
       <label>Naam <input name="name" required></label>
       <div class="row">
@@ -128,10 +213,10 @@
       <label>Notities <textarea name="notes" rows="2"></textarea></label>
       <label class="check"><input type="checkbox" name="active"> Actief</label>
       <div class="dialog-buttons">
-        <button type="button" id="delete-source" class="danger">Verwijderen</button>
+        <button type="button" id="delete-source" class="btn-danger">Verwijderen</button>
         <span class="spacer"></span>
-        <button type="button" id="cancel-source" class="secondary">Annuleren</button>
-        <button type="submit" class="primary">Opslaan</button>
+        <button type="button" id="cancel-source" class="pill-btn">Annuleren</button>
+        <button type="submit" class="btn-primary">Opslaan</button>
       </div>
     </form>
   </dialog>
