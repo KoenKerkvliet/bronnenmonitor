@@ -16,6 +16,9 @@ BG = "#f4f4f6"
 CATEGORY_LABELS = {
     "onderwijs": "Onderwijs",
     "webdesign": "Webdesign & tools",
+    "security": "Privacy & security",
+    "ai": "AI",
+    "bbq": "BBQ",
 }
 
 

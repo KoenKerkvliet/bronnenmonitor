@@ -17,7 +17,8 @@ def _to_row(item: Item, source: dict, baseline: bool) -> dict:
         "summary": item.summary or None,
         "tags": item.tags,
         "published_at": item.published_at.isoformat() if item.published_at else None,
-        "is_urgent": filters.is_urgent(item),
+        # Urgent kan per bron uit staan (kolom urgent_enabled; ontbreekt die nog, dan geldt "aan").
+        "is_urgent": source.get("urgent_enabled", True) and filters.is_urgent(item),
         "is_baseline": baseline,
     }
 

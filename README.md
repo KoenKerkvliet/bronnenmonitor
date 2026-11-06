@@ -4,7 +4,10 @@ Persoonlijke monitor die nieuws en changelogs volgt, filtert, opslaat in Supabas
 direct bij urgente berichten (security, kritiek…) en wekelijks een digest.
 
 - **Dashboard:** https://koenkerkvliet.github.io/bronnenmonitor/
-- **Bronnen nu:** Kennisnet (artikelen + nieuws), AOb, PO-Raad, WordPress News, Bricks Builder, Etch, Bricksforge
+- **Bronnen nu (24):** onderwijs (Kennisnet, AOb, PO-Raad, SLO, SIVON, Mediawijzer.net),
+  privacy & security (AP, NCSC, Patchstack, Wordfence), webdesign (WordPress, Bricks, Etch,
+  Bricksforge, WP Minute, WP Tavern, Make WordPress Core, YouTube: WPTuts en Rino de Boer),
+  AI (Anthropic, Claude release notes, OpenAI) en BBQ (YouTube: Ralphs BBQ Tube)
 
 ## Hoe het werkt
 
@@ -35,7 +38,13 @@ Dashboard (web/) → Supabase met inloggen via magic link, beveiligd met Row Lev
   `is_baseline` en nooit gemaild. Pas daarna telt iets als "nieuw". Een nieuwe bron geeft dus
   geen stortvloed aan mails.
 - **Filters per bron:** `include_keywords` (leeg = alles) en `exclude_keywords`. Items die
-  niet door het filter komen, worden niet opgeslagen.
+  niet door het filter komen, worden niet opgeslagen. Met `tag:Product` kijk je alleen naar de
+  tags/categorieën uit de feed (zo filtert OpenAI de klantverhalen weg).
+- **Urgent per bron:** in het dashboard per bron aan/uit (kolom `urgent_enabled`). Staat uit bij
+  YouTube-kanalen en algemene nieuwssites, waar "security" vaak voorkomt zonder dat het urgent is.
+- **YouTube:** elk kanaal heeft een RSS-feed:
+  `https://www.youtube.com/feeds/videos.xml?channel_id=UC…`. Het `channel_id` staat in de
+  broncode van de kanaalpagina (zoek op `channel_id=`). De feed bevat de laatste 15 video's.
 - **Urgent:** titel, samenvatting of tags bevatten een woord uit `URGENT_KEYWORDS`
   ([monitor/config.py](monitor/config.py)). Zinnen in `URGENT_IGNORE` tellen niet mee
   (bijv. "mission-critical" uit de standaardtekst bij WordPress-beta's).
@@ -53,7 +62,8 @@ Alles hieronder is al gedaan voor de huidige installatie; dit is voor als je het
 ### 1. Supabase
 
 1. Maak een project. Open **SQL Editor** en run achtereenvolgens
-   [supabase/migrations/001_schema.sql](supabase/migrations/001_schema.sql) en
+   [supabase/migrations/001_schema.sql](supabase/migrations/001_schema.sql),
+   [supabase/migrations/002_urgent_per_bron.sql](supabase/migrations/002_urgent_per_bron.sql) en
    [supabase/seed_sources.sql](supabase/seed_sources.sql).
 2. Zet jezelf op de allowlist:
    ```sql
@@ -181,3 +191,18 @@ dan verschijnt dat als fout bij de bron: meestal is de site aangepast of laadt d
 | Bricks Builder | rss | https://bricksbuilder.io/feed/?post_type=release | verborgen feed; reserve: page op /changelog/ |
 | Etch | rss | https://etchwp.com/feed/?post_type=changelog | verborgen feed; reserve: page op /changelog/ |
 | Bricksforge | page | https://bricksforge.io/version-changelog/ | alleen de laatste 3 versies staan op de pagina |
+| SLO | page | https://www.slo.nl/over-slo/nieuws/ | geen feed; linkmodus, geen datums |
+| SIVON | rss | https://sivon.nl/feed/ | |
+| Mediawijzer.net | rss | https://www.mediawijzer.net/feed/ | |
+| Autoriteit Persoonsgegevens | rss | https://www.autoriteitpersoonsgegevens.nl/feed/article/rss.xml | |
+| NCSC | rss | https://feeds.ncsc.nl/nieuws.rss | filter: WordPress, PHP, onderwijs, school(en) |
+| Patchstack / Wordfence | rss | https://patchstack.com/feed/ · https://www.wordfence.com/blog/feed/ | filter: Bricks, Bricksforge, Etch, WordPress Core |
+| The WP Minute / WP Tavern | rss | https://thewpminute.com/feed/ · https://wptavern.com/feed | urgent uit |
+| Make WordPress Core | rss | https://make.wordpress.org/core/feed/ | urgent uit |
+| WPTuts / Rino de Boer / Ralphs BBQ Tube | rss (YouTube) | `youtube.com/feeds/videos.xml?channel_id=…` | urgent uit |
+| Anthropic | page | https://www.anthropic.com/news | geen feed; kaartmodus, geen datums; urgent uit |
+| Claude release notes | rss | https://platform.claude.com/docs/en/release-notes/feed.xml | urgent uit |
+| OpenAI | rss | https://openai.com/news/rss.xml | filter: `tag:Product`, `tag:Safety`; urgent uit |
+
+Niet gelukt (2026-11-06): Rijksoverheid (feedserver onbereikbaar), Onderwijsinspectie, Didactief,
+Wij-leren en Leraar24 (geen werkende feed; eventueel later als page-bron).

@@ -16,9 +16,18 @@ def _text(item: Item) -> str:
     return " ".join([item.title or "", item.summary or "", " ".join(item.tags)])
 
 
+def _matches(item: Item, word: str, text: str) -> bool:
+    word = word.strip()
+    # "tag:Product" kijkt alleen naar de tags (exact, hoofdletterongevoelig)
+    if word.lower().startswith("tag:"):
+        wanted = word[4:].strip().lower()
+        return any(t.lower() == wanted for t in item.tags)
+    return bool(_pattern(word).search(text))
+
+
 def matches_any(item: Item, words: list[str]) -> bool:
     text = _text(item)
-    return any(_pattern(w).search(text) for w in words if w and w.strip())
+    return any(_matches(item, w, text) for w in words if w and w.strip())
 
 
 def passes_filters(item: Item, source: dict) -> bool:

@@ -3,7 +3,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const PAGE_SIZE = 50;
-const CATEGORY_LABELS = { onderwijs: "Onderwijs", webdesign: "Webdesign & tools" };
+const CATEGORY_LABELS = { onderwijs: "Onderwijs", webdesign: "Webdesign & tools", security: "Privacy & security", ai: "AI", bbq: "BBQ" };
 const STATUS_TITLES = { "": "Alle berichten", unread: "Ongelezen", saved: "Favorieten", urgent: "Urgent" };
 const FETCH_HOURS_UTC = [5, 11, 17]; // moet gelijk zijn aan de cron in .github/workflows/fetch.yml
 const MONTHS = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
@@ -380,7 +380,7 @@ function renderSources() {
       mono(s, "lg"),
       el("div", { class: "source-info" },
         el("span", { class: "source-name" }, s.name, s.active ? "" : " (uit)"),
-        el("span", { class: "source-url" }, `${hostOf(s.url)} · ${s.type}`),
+        el("span", { class: "source-url" }, `${hostOf(s.url)} · ${s.type}${s.urgent_enabled === false ? " · geen urgent-mail" : ""}`),
         status),
       el("span", { class: "chip static" }, categoryLabel(s.category)),
       el("span", { class: "source-total" }, `${total} ${total === 1 ? "bericht" : "berichten"}`),
@@ -415,6 +415,10 @@ function openSourceDialog(source = null) {
   form.item_pattern.value = s.item_pattern || "";
   form.notes.value = s.notes || "";
   form.active.checked = s.active;
+  // Urgent-schakelaar alleen tonen als de kolom bestaat (migratie 002 gedraaid)
+  const hasUrgentColumn = state.sources.some((x) => "urgent_enabled" in x);
+  $("#urgent-field").hidden = !hasUrgentColumn;
+  form.urgent_enabled.checked = s.urgent_enabled ?? true;
   togglePageFields();
   $("#source-dialog").showModal();
 }
@@ -438,6 +442,7 @@ async function saveSource(event) {
     notes: form.notes.value.trim() || null,
     active: form.active.checked,
   };
+  if (!$("#urgent-field").hidden) row.urgent_enabled = form.urgent_enabled.checked;
   if (row.type === "page" && !row.selector) {
     notify("Een page-bron heeft een CSS-selector nodig.", true);
     return;

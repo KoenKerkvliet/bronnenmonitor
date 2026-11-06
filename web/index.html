@@ -201,7 +201,7 @@
       </div>
       <datalist id="category-list"></datalist>
       <label>URL <input name="url" required placeholder="https://… of owner/repo"></label>
-      <label>Trefwoorden: alleen als het één van deze bevat <input name="include_keywords" placeholder="AI, privacy (leeg = alles)"></label>
+      <label>Trefwoorden: alleen als het één van deze bevat <input name="include_keywords" placeholder="AI, privacy, tag:Product (leeg = alles)"></label>
       <label>Trefwoorden: overslaan als het één van deze bevat <input name="exclude_keywords" placeholder="vacature, webinar"></label>
       <fieldset class="page-only">
         <legend>Alleen voor type page</legend>
@@ -212,6 +212,7 @@
       </fieldset>
       <label>Notities <textarea name="notes" rows="2"></textarea></label>
       <label class="check"><input type="checkbox" name="active"> Actief</label>
+      <label class="check" id="urgent-field"><input type="checkbox" name="urgent_enabled"> Urgent-mail bij woorden als security of kritiek</label>
       <div class="dialog-buttons">
         <button type="button" id="delete-source" class="btn-danger">Verwijderen</button>
         <span class="spacer"></span>
